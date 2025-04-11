@@ -1,6 +1,5 @@
-﻿using System.CommandLine;
-using Azure.Identity;
-using azure_sql_sk;
+﻿using azure_sql_sk;
+using System.CommandLine;
 
 var rootCommand = new RootCommand();
 
@@ -11,18 +10,18 @@ var envFileOption = new Option<string>(
 envFileOption.AddAlias("-e"); 
 
 var debugOption = new Option<Boolean>(
-    name: "--debug", 
+    name: "--debug",
     description: "Enable debug mode.",
     getDefaultValue: () => false);
 
-var deployDbCommand = new Command("deploy", "Deploy the database");
-deployDbCommand.AddOption(envFileOption); 
-deployDbCommand.SetHandler(DatabaseUtils.Deploy, envFileOption);
-rootCommand.Add(deployDbCommand);
+//var deployDbCommand = new Command("deploy", "Deploy the database");
+//deployDbCommand.AddOption(envFileOption); 
+//deployDbCommand.SetHandler(DatabaseUtils.Deploy, envFileOption);
+//rootCommand.Add(deployDbCommand);
 
 var chatCommand = new Command("chat", "Run the chatbot");
-chatCommand.AddOption(envFileOption); 
-chatCommand.AddOption(debugOption); 
+chatCommand.AddOption(envFileOption);
+chatCommand.AddOption(debugOption);
 chatCommand.SetHandler(async (envFileOptionValue, debugOptionValue) => 
     {
         var chatBot = new ChatBot(envFileOptionValue);

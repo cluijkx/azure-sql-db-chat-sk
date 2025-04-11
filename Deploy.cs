@@ -1,10 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Text;
 using DbUp;
 using DbUp.ScriptProviders;
-using Microsoft.Data.SqlClient;
 using DotNetEnv;
+using Microsoft.Data.SqlClient;
+using System.Text;
 
 namespace azure_sql_sk;
 
@@ -17,12 +15,12 @@ class DatabaseUtils
         string azureOpenAIEndpoint = Env.GetString("OPENAI_URL");
         string azureOpenAIApiKey = Env.GetString("OPENAI_KEY");
         string embeddingModelDeploymentName = Env.GetString("OPENAI_EMBEDDING_DEPLOYMENT_NAME");
-        string sqlConnectionString = Env.GetString("MSSQL_CONNECTION_STRING");        
+        string sqlConnectionString = Env.GetString("MSSQL_CONNECTION_STRING");
 
         if (string.IsNullOrEmpty(sqlConnectionString)) {
             throw new ApplicationException("MSSQL environment variable not set or empty.");
         }
-        
+
         var csb = new SqlConnectionStringBuilder(sqlConnectionString);
         Console.WriteLine($"Deploying database: {csb.InitialCatalog}");
 
@@ -49,15 +47,15 @@ class DatabaseUtils
             .SqlDatabase(csb.ConnectionString)
             .WithVariables(variables)
             .WithScriptsFromFileSystem("sql", options)
-            .JournalToSqlTable("dbo", "$__dbup_journal")                                               
+            .JournalToSqlTable("dbo", "$__dbup_journal")
             .LogToConsole()
             .Build();
-        
+
         var result = dbup.PerformUpgrade();
 
         if (!result.Successful)
         {
-            throw result.Error;            
+            throw result.Error;
         }
     }
 }

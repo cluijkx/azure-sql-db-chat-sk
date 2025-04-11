@@ -1,16 +1,15 @@
-using System.Text;
+using DotNetEnv;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Console;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.AzureOpenAI;
 using Microsoft.SemanticKernel.Connectors.SqlServer;
 using Microsoft.SemanticKernel.Memory;
-using Microsoft.Extensions.Logging.Console;
-using DotNetEnv;
-using System.Text.Json;
 using Spectre.Console;
-using Microsoft.SemanticKernel.Services;
+using System.Text;
+using System.Text.Json;
 
 #pragma warning disable SKEXP0001, SKEXP0010, SKEXP0020
 
@@ -41,9 +40,9 @@ public class ChatBot
         AnsiConsole.Clear();
         AnsiConsole.Foreground = Color.Green;
 
-        var table = new Table();    
-        table.Expand();      
-        table.AddColumn(new TableColumn("[bold]Insurance Agent Assistant[/] v2.100").Centered());       
+        var table = new Table();
+        table.Expand();
+        table.AddColumn(new TableColumn("[bold]Insurance Agent Assistant[/] v2.100").Centered());
         AnsiConsole.Write(table);
 
         //AnsiConsole.WriteLine($"azureOpenAIEndpoint: {azureOpenAIEndpoint}, embeddingModelDeploymentName: {embeddingModelDeploymentName}, chatModelDeploymentName: {chatModelDeploymentName}, sqlTableName: {sqlTableName}");
@@ -56,7 +55,7 @@ public class ChatBot
         (var logger, var kernel, var memory, var ai) = await AnsiConsole.Status().StartAsync("Booting up agent...", async ctx =>
         {
             ctx.Spinner(Spinner.Known.Default);
-            ctx.SpinnerStyle(Style.Parse("yellow"));          
+            ctx.SpinnerStyle(Style.Parse("yellow"));
 
             AnsiConsole.WriteLine("Initializing kernel...");
             var sc = new ServiceCollection();
@@ -81,20 +80,20 @@ public class ChatBot
                             );
                         }
                     )
-                    .Build();  
-                    
+                    .Build();
+
             AnsiConsole.WriteLine("Initializing plugins...");
             var kernel = services.GetRequiredService<Kernel>();
             kernel.Plugins.AddFromObject(new SearchSessionPlugin(kernel, memory, logger, sqlConnectionString));
             var ai = kernel.GetRequiredService<IChatCompletionService>();
-            
+
             AnsiConsole.WriteLine("Initializing long-term memory...");
-            await memory.SaveInformationAsync(sqlTableName, "Premium for car insurance have been increased by 15% starting from Septmber 2024", "policy-price-increase");        
+            await memory.SaveInformationAsync(sqlTableName, "Premium for car insurance have been increased by 15% starting from Septmber 2024", "policy-price-increase");
             await memory.SaveInformationAsync(sqlTableName, """
                 Customers can reduce there premium by subscribing to the "Safety Score" program which will 
                 monitor their driving habits and provide discounts based on their driving score.
-            """, "memory-1");                
-            
+            """, "memory-1");
+
             AnsiConsole.WriteLine("Done!");
 
             return (logger, kernel, memory, ai);
@@ -104,7 +103,7 @@ public class ChatBot
         var chat = new ChatHistory($"You are an AI assistant that helps insurance agents to find information on customers data and status. Use a professional tone when aswering and provide a summary of data instead of lists. If users ask about topics you don't know, answer that you don't know. Today's date is {DateTime.Now:yyyy-MM-dd}. Query the database at every user request, even if information is available in chat history, to make sure you always have the latest information.");    
         var builder = new StringBuilder();
         while (true)
-        {            
+        {
             AnsiConsole.WriteLine();
             var question = AnsiConsole.Prompt(new TextPrompt<string>($"🧑: "));
 
@@ -120,7 +119,7 @@ public class ChatBot
                     chat.RemoveRange(1, chat.Count - 1);
                     AnsiConsole.WriteLine("Chat history cleared.");
                     continue;
-            
+
                 case "/h":
                     foreach (var message in chat)
                     {
@@ -128,7 +127,7 @@ public class ChatBot
                         AnsiConsole.WriteLine($"> MESSAGE  > {message.Content}");
                         AnsiConsole.WriteLine($"> METADATA > {JsonSerializer.Serialize(message.Metadata)}");
                         AnsiConsole.WriteLine($"> ------------------------------------");
-                    }                        
+                    }
                     continue;
             }
 
@@ -137,9 +136,9 @@ public class ChatBot
             await AnsiConsole.Status().StartAsync("Thinking...", async ctx =>
             {
                 ctx.Spinner(Spinner.Known.Default);
-                ctx.SpinnerStyle(Style.Parse("yellow"));       
+                ctx.SpinnerStyle(Style.Parse("yellow"));
 
-                logger.LogDebug("Searching information from the memory...");                
+                logger.LogDebug("Searching information from the memory...");
                 builder.Clear();
                 await foreach (var result in memory.SearchAsync(sqlTableName, question, limit: 3, minRelevanceScore: 0.35))
                 {
@@ -154,7 +153,7 @@ public class ChatBot
                     chat.AddSystemMessage(builder.ToString());
                 }
             });
-            
+
             AnsiConsole.WriteLine();
             AnsiConsole.WriteLine("🤖: Formulating answer...");
             builder.Clear();
@@ -173,11 +172,9 @@ public class ChatBot
                 AnsiConsole.Write(message.Content ?? string.Empty);
                 builder.Append(message.Content);
             }
-            AnsiConsole.WriteLine();                        
-            
+            AnsiConsole.WriteLine();
 
-            chat.AddAssistantMessage(builder.ToString());           
+            chat.AddAssistantMessage(builder.ToString());
         }
     }
 }
-
