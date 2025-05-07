@@ -14,10 +14,10 @@ var debugOption = new Option<Boolean>(
     description: "Enable debug mode.",
     getDefaultValue: () => false);
 
-//var deployDbCommand = new Command("deploy", "Deploy the database");
-//deployDbCommand.AddOption(envFileOption); 
-//deployDbCommand.SetHandler(DatabaseUtils.Deploy, envFileOption);
-//rootCommand.Add(deployDbCommand);
+var deployDbCommand = new Command("deploy", "Deploy the database");
+deployDbCommand.AddOption(envFileOption); 
+deployDbCommand.SetHandler(DatabaseUtils.Deploy, envFileOption);
+rootCommand.Add(deployDbCommand);
 
 var chatCommand = new Command("chat", "Run the chatbot");
 chatCommand.AddOption(envFileOption);

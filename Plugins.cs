@@ -212,7 +212,7 @@ public class SearchSessionPlugin(Kernel kernel, ISemanticTextMemory memory, ILog
     [Description("Return interactions history for a customer based on the customer id on a specified subject. If subject is not provided, return all interactions.")]
     public async Task<IEnumerable<CommunicationHistory>> GetCustomerInteractions(int customerId, string subject)
     {
-        logger.LogInformation($"Searching for in customers history for interactions on '{subject}' subject");
+        logger.LogInformation($"Searching in communication history for interactions on '{subject}' subject");
 
         DefaultTypeMap.MatchNamesWithUnderscores = true;
 
